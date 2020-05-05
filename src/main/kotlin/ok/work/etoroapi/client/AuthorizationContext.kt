@@ -1,6 +1,7 @@
 package ok.work.etoroapi.client
 
 import ok.work.etoroapi.client.cookies.EtoroMetadataService
+import ok.work.etoroapi.config.UserDataProperties
 import ok.work.etoroapi.model.TradingMode
 import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,6 +27,8 @@ class AuthorizationContext {
 
     @Autowired
     private lateinit var credentialsService: EtoroMetadataService
+    @Autowired
+    private lateinit var userData: UserDataProperties
 
     @PostConstruct
     fun setupAuthorizationContext() {
@@ -37,7 +40,7 @@ class AuthorizationContext {
         if (token != null) {
             exchangeToken = token
         } else {
-            auth(System.getenv("LOGIN"), System.getenv("PASSWORD"))
+            auth(userData.login, userData.pass)
             exchange()
         }
         getAccountData(TradingMode.REAL)
