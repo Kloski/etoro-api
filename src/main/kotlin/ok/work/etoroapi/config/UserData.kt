@@ -11,7 +11,5 @@ data class UserDataProperties(
         var login: String = "",
         var email: String = "",
         var nickname: String = "",
-        var pass: String = "",
-        var person_to_monitor: String = "",
-        var person_to_monitor_cid: String = ""
+        var pass: String = ""
 )

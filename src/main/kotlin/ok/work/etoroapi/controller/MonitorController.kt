@@ -3,7 +3,10 @@ package ok.work.etoroapi.controller
 import ok.work.etoroapi.client.EtoroHttpClient
 import ok.work.etoroapi.client.EtoroMirrors
 import ok.work.etoroapi.client.EtoroPosition
+import ok.work.etoroapi.model.UserDetail
 import ok.work.etoroapi.config.UserDataProperties
+import ok.work.etoroapi.model.DailyChartData
+import ok.work.etoroapi.model.YearMonthPerformance
 import ok.work.etoroapi.model.ofString
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
@@ -20,9 +23,24 @@ class MonitorController {
     private lateinit var userData: UserDataProperties
 
 
+    @GetMapping("/detail")
+    fun getPersonDetail(@RequestHeader(defaultValue = "Demo") mode: String, @RequestParam cid: String): UserDetail {
+        return httpClient.getPersonDetail(ofString(mode), cid)
+    }
+
+    @GetMapping("/history")
+    fun getPersonHistory(@RequestHeader(defaultValue = "Demo") mode: String, @RequestParam cid: String): YearMonthPerformance {
+        return httpClient.getPersonHistory(ofString(mode), cid)
+    }
+
+    @GetMapping("/chart")
+    fun getPersonChart(@RequestHeader(defaultValue = "Demo") mode: String, @RequestParam userName: String): DailyChartData {
+        return httpClient.getPersonDailyChartData(ofString(mode), userName)
+    }
+
     @GetMapping
-    fun getMonitoredPersonData(@RequestHeader(defaultValue = "Demo") mode: String): List<EtoroMirrors> {
-        return httpClient.getPersonData(ofString(mode), userData.person_to_monitor_cid)
+    fun getMonitoredPersonData(@RequestHeader(defaultValue = "Demo") mode: String, @RequestParam cid: String): List<EtoroMirrors> {
+        return httpClient.getPersonData(ofString(mode), cid)
     }
 
 

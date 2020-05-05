@@ -5,9 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import ok.work.etoroapi.client.cookies.EtoroMetadataService
-import ok.work.etoroapi.model.Position
-import ok.work.etoroapi.model.PositionType
-import ok.work.etoroapi.model.TradingMode
+import ok.work.etoroapi.model.*
 import ok.work.etoroapi.transactions.Transaction
 import ok.work.etoroapi.transactions.TransactionPool
 import ok.work.etoroapi.watchlist.EtoroAsset
@@ -55,6 +53,54 @@ class EtoroHttpClient {
 
     private val client = HttpClient.newHttpClient()
 
+    fun getPersonDetail(mode: TradingMode, cid: String): UserDetail {
+        val req = prepareRequest("sapi/rankings/cid/${cid}/rankings/?Period=OneYearAgo&&client_request_id=${authorizationContext.requestId}",
+                authorizationContext.exchangeToken, mode, metadataService.getMetadata())
+                .GET()
+                .build()
+
+        val jsonObject = JSONObject(client.send(req, HttpResponse.BodyHandlers.ofString()).body())
+        val personData = jsonObject.getJSONObject("Data").toString()
+
+        val mapper = jacksonObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
+        val result: UserDetail = mapper.readValue(personData)
+        return result
+    }
+
+    fun getPersonHistory(mode: TradingMode, cid: String): YearMonthPerformance {
+        val req = prepareRequest("sapi/userstats/gain/cid/${cid}/history?IncludeSimulation=true&&client_request_id=${authorizationContext.requestId}",
+                authorizationContext.exchangeToken, mode, metadataService.getMetadata())
+                .GET()
+                .build()
+
+        val jsonStr = client.send(req, HttpResponse.BodyHandlers.ofString()).body()
+
+        val mapper = jacksonObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
+        val result: YearMonthPerformance = mapper.readValue(jsonStr)
+        return result
+    }
+
+    fun getPersonDailyChartData(mode: TradingMode, userName: String): DailyChartData {
+        val req = prepareRequest("sapi/userstats/CopySim/Username/${userName}/OneYearAgo?callback=angular.callbacks._1&client_request_id=${authorizationContext.requestId}",
+                authorizationContext.exchangeToken, mode, metadataService.getMetadata())
+                .GET()
+                .build()
+
+        val jsonStr = client.send(req, HttpResponse.BodyHandlers.ofString()).body()
+        val substringAfter = jsonStr.substringAfter('{')
+        val substringBeforeLast = substringAfter.substringBeforeLast('}')
+
+        val mapper = jacksonObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
+        val result: DailyChartData = mapper.readValue("{" + substringBeforeLast + "}")
+        return result
+    }
+
     /**
      * {
     "AggregatedPositions": [],
@@ -91,14 +137,13 @@ class EtoroHttpClient {
                 .build()
 
         val jsonObject = JSONObject(client.send(req, HttpResponse.BodyHandlers.ofString()).body())
-        val response = jsonObject
-                .getJSONArray("AggregatedMirrors")
-                .toString()
+        val copyPersons = jsonObject.getJSONArray("AggregatedMirrors").toString()
+        val aggregatedPositions = jsonObject.getJSONArray("AggregatedPositions").toString()
 
         val mapper = jacksonObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
-        val result: List<EtoroMirrors> = mapper.readValue(response)
+        val result: List<EtoroMirrors> = mapper.readValue(copyPersons)
         return result
     }
 
