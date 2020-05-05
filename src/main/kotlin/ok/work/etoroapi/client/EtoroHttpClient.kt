@@ -19,6 +19,7 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.util.*
 
 data class ViewContext(val ClientViewRate: Double)
 
@@ -27,6 +28,9 @@ data class EtoroPosition(val PositionID: String?, val InstrumentID: String, val 
                          val StopLossRate: Double, val TakeProfitRate: Double, val IsTslEnabled: Boolean,
                          val View_MaxPositionUnits: Int, val View_Units: Double, val View_openByUnits: Boolean?,
                          val Amount: Int, val ViewRateContext: ViewContext?, val OpenDateTime: String?, val isDiscounted: Boolean?)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class EtoroMirrors(val Invested: Double, val NetProfit: Double, val PendingForClosure: Boolean, val MirrorID: Long, val Value: Double, val ParentCID: Long, val ParentUsername: String)
 
 data class AssetInfoRequest(val instrumentIds: Array<String>)
 
@@ -51,6 +55,67 @@ class EtoroHttpClient {
 
     private val client = HttpClient.newHttpClient()
 
+    /**
+     * {
+    "AggregatedPositions": [],
+    "CreditByRealizedEquity": 12.626725240114133,
+    "AggregatedPositionsByInstrumentTypeID": [],
+    "AggregatedMirrors": [
+    {
+    "Invested": 1.59716726414,
+    "NetProfit": -0.5716,
+    "PendingForClosure": false,
+    "MirrorID":5659,
+    "Value": 1.5938,
+    "ParentCID": 9971,
+    "ParentUsername": "XXX"
+    },
+    {
+    "Invested": 1.59716726414,
+    "NetProfit": 0,
+    "PendingForClosure": false,
+    "MirrorID": 5662,
+    "Value": 1.603,
+    "ParentCID": 2318,
+    "ParentUsername": "YYY"
+    }
+    ],
+    "AggregatedPositionsByStockIndustryID": [],
+    "CreditByUnrealizedEquity": 12.673317709949336
+    }
+     */
+    fun getPersonData(mode: TradingMode, cid: String): List<EtoroMirrors> {
+        val req = prepareRequest("sapi/trade-data-real/live/public/portfolios?cid=${cid}&client_request_id=${authorizationContext.requestId}",
+                authorizationContext.exchangeToken, mode, metadataService.getMetadata())
+                .GET()
+                .build()
+
+        val jsonObject = JSONObject(client.send(req, HttpResponse.BodyHandlers.ofString()).body())
+        val response = jsonObject
+                .getJSONArray("AggregatedMirrors")
+                .toString()
+
+        val mapper = jacksonObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
+        val result: List<EtoroMirrors> = mapper.readValue(response)
+        return result
+    }
+
+    /**
+     * Copy user detail data - not so useful
+     */
+    fun getPersonDataData(mode: TradingMode, cidList: String): List<EtoroPosition> {
+        val req = prepareRequest("api/logininfo/v1.1/aggregatedInfo?avatar=false&cidList=%5B${cidList}%5D&client_request_id=${authorizationContext.requestId}&realcid=true",
+                authorizationContext.exchangeToken, mode, metadataService.getMetadata())
+                .GET()
+                .build()
+
+        val response = JSONObject(client.send(req, HttpResponse.BodyHandlers.ofString()).body())
+                .toString()
+
+        return Collections.emptyList()
+    }
 
     fun getPositions(mode: TradingMode): List<EtoroPosition> {
         val req = prepareRequest("api/logininfo/v1.1/logindata?" +
@@ -59,7 +124,8 @@ class EtoroHttpClient {
                 .GET()
                 .build()
 
-        val response = JSONObject(client.send(req, HttpResponse.BodyHandlers.ofString()).body())
+        val logindataJsonObject = JSONObject(client.send(req, HttpResponse.BodyHandlers.ofString()).body())
+        val response = logindataJsonObject
                 .getJSONObject("AggregatedResult")
                 .getJSONObject("ApiResponses")
                 .getJSONObject("PrivatePortfolio")
@@ -88,7 +154,7 @@ class EtoroHttpClient {
         val type = position.type.equals(PositionType.BUY)
         val instrumentId = position.instrumentId ?: watchlist.getInstrumentIdByName(position.name ?: "")
         val assetInfo = getAssetInfo(instrumentId, mode)
-        val price = watchlist.getPrice(instrumentId, position.type,assetInfo.getBoolean("AllowDiscountedRates"))
+        val price = watchlist.getPrice(instrumentId, position.type, assetInfo.getBoolean("AllowDiscountedRates"))
         val leverages = assetInfo.getJSONArray("Leverages")
         val minPositionAmount = assetInfo.getInt("MinPositionAmount")
         val minPositionAmountAbsolute = assetInfo.getInt("MinPositionAmountAbsolute")
@@ -110,7 +176,7 @@ class EtoroHttpClient {
                 }
             }
             val positionRequestBody = EtoroPosition(null, instrumentId, type, position.leverage, position.stopLossRate, position.takeProfitRate, false, assetInfo.getInt("MaxPositionUnits"),
-                    0.01, false,  position.amount, ViewContext(price), null, assetInfo.getBoolean("AllowDiscountedRates"))
+                    0.01, false, position.amount, ViewContext(price), null, assetInfo.getBoolean("AllowDiscountedRates"))
 
             val req = prepareRequest("sapi/trade-${mode.name.toLowerCase()}/positions?client_request_id=${authorizationContext.requestId}", authorizationContext.exchangeToken, mode, metadataService.getMetadata())
                     .POST(HttpRequest.BodyPublishers.ofString(JSONObject(positionRequestBody).toString()))
