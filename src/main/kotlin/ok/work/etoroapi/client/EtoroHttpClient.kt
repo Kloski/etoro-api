@@ -84,8 +84,8 @@ class EtoroHttpClient {
         return result
     }
 
-    fun getPersonDailyChartData(mode: TradingMode, userName: String): DailyChartData {
-        val req = prepareRequest("sapi/userstats/CopySim/Username/${userName}/OneYearAgo?callback=angular.callbacks._1&client_request_id=${authorizationContext.requestId}",
+    fun getPersonDailyChartData(mode: TradingMode, userName: String, period: String?): DailyChartData {
+        val req = prepareRequest("sapi/userstats/CopySim/Username/${userName}/${if (period != null) period else "OneYearAgo"}?callback=angular.callbacks._1&client_request_id=${authorizationContext.requestId}",
                 authorizationContext.exchangeToken, mode, metadataService.getMetadata())
                 .GET()
                 .build()
@@ -93,43 +93,18 @@ class EtoroHttpClient {
         val jsonStr = client.send(req, HttpResponse.BodyHandlers.ofString()).body()
         val substringAfter = jsonStr.substringAfter('{')
         val substringBeforeLast = substringAfter.substringBeforeLast('}')
+        val jsonObject = JSONObject("{" + substringBeforeLast + "}")
+        val chartData = jsonObject.getJSONObject("simulation");
+        var periodName: String? = chartData.keys().next()
+
 
         val mapper = jacksonObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
-        val result: DailyChartData = mapper.readValue("{" + substringBeforeLast + "}")
+        val result: DailyChartData = mapper.readValue(chartData.get(periodName).toString())
         return result
     }
 
-    /**
-     * {
-    "AggregatedPositions": [],
-    "CreditByRealizedEquity": 12.626725240114133,
-    "AggregatedPositionsByInstrumentTypeID": [],
-    "AggregatedMirrors": [
-    {
-    "Invested": 1.59716726414,
-    "NetProfit": -0.5716,
-    "PendingForClosure": false,
-    "MirrorID":5659,
-    "Value": 1.5938,
-    "ParentCID": 9971,
-    "ParentUsername": "XXX"
-    },
-    {
-    "Invested": 1.59716726414,
-    "NetProfit": 0,
-    "PendingForClosure": false,
-    "MirrorID": 5662,
-    "Value": 1.603,
-    "ParentCID": 2318,
-    "ParentUsername": "YYY"
-    }
-    ],
-    "AggregatedPositionsByStockIndustryID": [],
-    "CreditByUnrealizedEquity": 12.673317709949336
-    }
-     */
     fun getPersonData(mode: TradingMode, cid: String): List<EtoroMirrors> {
         val req = prepareRequest("sapi/trade-data-real/live/public/portfolios?cid=${cid}&client_request_id=${authorizationContext.requestId}",
                 authorizationContext.exchangeToken, mode, metadataService.getMetadata())

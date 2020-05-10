@@ -1,14 +1,6 @@
 package ok.work.etoroapi.model
 
 data class DailyChartData(
-        val simulation: Simulation
-)
-
-data class Simulation(
-        val oneYearAgo: OneYearAgo
-)
-
-data class OneYearAgo(
         val assets: Any?,
         val auditTrail: List<Any>,
         val chart: List<Chart>,

@@ -34,11 +34,11 @@ class MonitorController {
     }
 
     @GetMapping("/chart")
-    fun getPersonChart(@RequestHeader(defaultValue = "Demo") mode: String, @RequestParam userName: String): DailyChartData {
-        return httpClient.getPersonDailyChartData(ofString(mode), userName)
+    fun getPersonChart(@RequestHeader(defaultValue = "Demo") mode: String, @RequestParam userName: String, @RequestParam period: String?): DailyChartData {
+        return httpClient.getPersonDailyChartData(ofString(mode), userName, period)
     }
 
-    @GetMapping
+    @GetMapping("/portfolio")
     fun getMonitoredPersonData(@RequestHeader(defaultValue = "Demo") mode: String, @RequestParam cid: String): List<EtoroMirrors> {
         return httpClient.getPersonData(ofString(mode), cid)
     }
