@@ -1,53 +1,58 @@
 package ok.work.etoroapi.client.websocket.listeners
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.lightstreamer.client.ItemUpdate
 import com.lightstreamer.client.Subscription
 import com.lightstreamer.client.SubscriptionListener
+import org.slf4j.LoggerFactory
 
 open class EtoroListener : SubscriptionListener {
-    
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     override fun onListenEnd(subscription: Subscription) {
-        println("onListenEnd")
+        val subscriptionJsonStr = jacksonObjectMapper().writeValueAsString(subscription)
+        logger.warn("onListenEnd: $subscriptionJsonStr")
     }
 
     override fun onItemUpdate(itemUpdate: ItemUpdate) {
-        println("updated")
+        val jsonStr = jacksonObjectMapper().writeValueAsString(itemUpdate)
+        logger.warn("onItemUpdate: $jsonStr")
     }
 
     override fun onSubscription() {
-        println("subscribed")
+        logger.warn("onSubscription - subscribed")
     }
 
     override fun onEndOfSnapshot(itemName: String?, itemPos: Int) {
-        println("eos $itemName $itemPos")
+        logger.warn("onEndOfSnapshot: $itemName, itemPos: $itemPos")
     }
 
     override fun onItemLostUpdates(itemName: String?, itemPos: Int, lostUpdates: Int) {
-        println("onItemLostUpdates $itemName")
+        logger.warn("onItemLostUpdates: $itemName, itemPos: $itemPos, lostUpdates: $lostUpdates")
     }
 
     override fun onSubscriptionError(code: Int, message: String?) {
-        println("onSubscriptionError $message")
+        logger.warn("onSubscriptionError: $message, code: $code")
     }
 
     override fun onClearSnapshot(itemName: String?, itemPos: Int) {
-        println("onClearSnapshot")
+        logger.warn("onClearSnapshot: $itemName, itemPos: $itemPos")
     }
 
     override fun onCommandSecondLevelSubscriptionError(code: Int, message: String?, key: String?) {
-        println("onCommandSecondLevelSubscriptionError $code $message")
+        logger.warn("onCommandSecondLevelSubscriptionError: $message, code: $code, key: $key")
     }
 
     override fun onUnsubscription() {
-        println("onUnsubscription")
+        logger.warn("onUnsubscription")
     }
 
     override fun onCommandSecondLevelItemLostUpdates(lostUpdates: Int, key: String) {
-        println("onCommandSecondLevelItemLostUpdates $lostUpdates")
+        logger.warn("onCommandSecondLevelItemLostUpdates: $lostUpdates, key: $key")
     }
 
     override fun onListenStart(subscription: Subscription) {
-        println("start listening")
+        logger.warn("onListenStart: $subscription")
     }
 
 }

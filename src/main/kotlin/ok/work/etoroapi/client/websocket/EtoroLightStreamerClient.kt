@@ -6,19 +6,21 @@ import ok.work.etoroapi.client.AuthorizationContext
 import ok.work.etoroapi.client.cookies.EtoroMetadataService
 import ok.work.etoroapi.client.websocket.listeners.EtoroPositionListener
 import ok.work.etoroapi.client.websocket.listeners.EtoroPriceListener
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import javax.annotation.PostConstruct
 
-val subscriptionFields = arrayOf( "InstrumentID", "Ask", "Bid", "IsMarketOpen",
-       "ConversionRateBid", "ConversionRateAsk",
+val subscriptionFields = arrayOf("InstrumentID", "Ask", "Bid", "IsMarketOpen",
+        "ConversionRateBid", "ConversionRateAsk",
         "AllowBuy", "AllowSell",
         "LastExecution",
         "OfficialClosingPrice", "PriceRateID", "UnitMarginAsk", "UnitMarginBid",
-        "MaxPositionUnits", "IsInstrumentActive", "AskDiscounted", "BidDiscounted","UnitMarginAskDiscounted", "UnitMarginBidDiscounted", "isDiscounted")
+        "MaxPositionUnits", "IsInstrumentActive", "AskDiscounted", "BidDiscounted", "UnitMarginAskDiscounted", "UnitMarginBidDiscounted", "isDiscounted")
 
 @Component
 class EtoroLightStreamerClient {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     lateinit var client: LightstreamerClient
 
@@ -60,7 +62,7 @@ class EtoroLightStreamerClient {
         positionsSubReal.requestedSnapshot = "no"
         realClient.subscribe(positionsSubReal)
 
-        println("connected")
+        logger.warn("LightStreamer connected")
     }
 
     fun subscribeById(id: String) {
@@ -68,7 +70,8 @@ class EtoroLightStreamerClient {
         sub.requestedSnapshot = "yes"
         sub.addListener(priceListener)
         client.subscribe(sub)
-        println(subscriptionFields.joinToString(" | "))
+        val joinedFields = subscriptionFields.joinToString(" | ")
+        logger.warn("subscribeById: $joinedFields")
     }
 
     fun subscribeByIds(idList: List<String>) {
@@ -77,7 +80,8 @@ class EtoroLightStreamerClient {
         sub.requestedSnapshot = "yes"
         sub.addListener(priceListener)
         client.subscribe(sub)
-        println(subscriptionFields.joinToString(" | "))
+        val joinedFields = subscriptionFields.joinToString(" | ")
+        logger.warn("subscribeByIds: $joinedFields")
     }
 
 }

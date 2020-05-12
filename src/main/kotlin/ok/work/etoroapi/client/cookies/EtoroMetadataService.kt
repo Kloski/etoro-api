@@ -3,6 +3,7 @@ package ok.work.etoroapi.client.cookies
 import org.openqa.selenium.phantomjs.PhantomJSDriver
 import org.openqa.selenium.phantomjs.PhantomJSDriverService
 import org.openqa.selenium.remote.DesiredCapabilities
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import javax.annotation.PostConstruct
 
@@ -11,6 +12,7 @@ data class EtoroMetadata(val cookies: String, val lsPassword: String)
 
 @Component
 class EtoroMetadataService {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     private lateinit var cookies: String
 
@@ -39,7 +41,7 @@ class EtoroMetadataService {
 
         val cookiesSet = driver.manage().cookies
         cookies = cookiesSet.toList().map { cookie -> "${cookie.name}=${cookie.value}" }.joinToString("; ")
-        println("cookies: $cookies")
+        logger.info("init-cookies: $cookies")
 
         driver.close()
 

@@ -4,6 +4,7 @@ import ok.work.etoroapi.client.cookies.EtoroMetadataService
 import ok.work.etoroapi.config.UserDataProperties
 import ok.work.etoroapi.model.TradingMode
 import org.json.JSONObject
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.net.URI
@@ -15,6 +16,7 @@ import javax.annotation.PostConstruct
 
 @Component
 class AuthorizationContext {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     lateinit var exchangeToken: String
     lateinit var accessToken: String
@@ -27,6 +29,7 @@ class AuthorizationContext {
 
     @Autowired
     private lateinit var credentialsService: EtoroMetadataService
+
     @Autowired
     private lateinit var userData: UserDataProperties
 
@@ -61,11 +64,11 @@ class AuthorizationContext {
                 .header("sec-fetch-mode", "cors")
                 .header("referer", "https://www.etoro.com/login")
                 .header("cookie", credentialsService.getMetadata().cookies)
-               // .header("cookie", "etoroHPRedirect=1; _ga=GA1.2.1096383890.1543357062; visid_incap_172517=ZNWYjpoOTt6IOfHx3HN5VxPG/VsAAAAAQUIPAAAAAACPZ88tOSyD62NooqBbZ/hN; visid_incap_773285=pfQdz3B9TZuve/PhmXgPnF3G/VsAAAAAQUIPAAAAAAC7uOLsspgsQRNnV9pm9LiA; fbm_166209726726710=base_domain=.etoro.com; liveagent_oref=; liveagent_ptid=b60ed7d3-3047-4752-86d1-14ba900fd3c4; _DCMN_id.90.13db=2a8b42dd8726053f.1543357972.4.1543872510.1543768287.; TMIS2=${credentialsService.getCredentials().tmis2}; _gat=1;")
+                // .header("cookie", "etoroHPRedirect=1; _ga=GA1.2.1096383890.1543357062; visid_incap_172517=ZNWYjpoOTt6IOfHx3HN5VxPG/VsAAAAAQUIPAAAAAACPZ88tOSyD62NooqBbZ/hN; visid_incap_773285=pfQdz3B9TZuve/PhmXgPnF3G/VsAAAAAQUIPAAAAAAC7uOLsspgsQRNnV9pm9LiA; fbm_166209726726710=base_domain=.etoro.com; liveagent_oref=; liveagent_ptid=b60ed7d3-3047-4752-86d1-14ba900fd3c4; _DCMN_id.90.13db=2a8b42dd8726053f.1543357972.4.1543872510.1543768287.; TMIS2=${credentialsService.getCredentials().tmis2}; _gat=1;")
                 .POST(HttpRequest.BodyPublishers.ofString("{\"Password\":\"${pwd}\",\"UserLoginIdentifier\":\"${username}\",\"Username\":\"${username}\",\"rememberMe\":true,\"RequestedScopes\":[]}"))
                 .build()
         val response = client.send(req, HttpResponse.BodyHandlers.ofString()).body()
-        println(response)
+        logger.debug("auth: $response")
         accessToken = JSONObject(response).getString("accessToken").toString()
     }
 

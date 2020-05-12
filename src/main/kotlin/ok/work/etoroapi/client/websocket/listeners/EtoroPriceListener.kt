@@ -1,20 +1,24 @@
 package ok.work.etoroapi.client.websocket.listeners
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.lightstreamer.client.ItemUpdate
 import com.lightstreamer.client.Subscription
 import ok.work.etoroapi.client.websocket.subscriptionFields
 import ok.work.etoroapi.watchlist.Watchlist
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
 class EtoroPriceListener : EtoroListener() {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @Autowired
     lateinit var watchlist: Watchlist
 
     override fun onListenEnd(subscription: Subscription) {
-        println("onListenEnd")
+        val subscriptionJsonStr = jacksonObjectMapper().writeValueAsString(subscription)
+        logger.warn("onListenEnd: $subscriptionJsonStr")
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -29,8 +33,7 @@ class EtoroPriceListener : EtoroListener() {
         for (i in 1..subscriptionFields.size) {
             log.append("${itemUpdate.getValue(i)} | ")
         }
-        println(log.toString())
+        val strLog = log.toString()
+        logger.info("onItemUpdate: $strLog")
     }
-
-
 }

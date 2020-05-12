@@ -29,11 +29,17 @@ dependencies {
 
     compile("org.jetbrains.kotlin:kotlin-reflect")
     compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    compile  ("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+    compile("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 
     compile("com.lightstreamer:ls-javase-client:3.1.1")
 
     compile("com.fasterxml.jackson.module:jackson-module-kotlin:2.10.2")
+
+    compile("org.slf4j:slf4j-api:1.7.30")
+    compile("ch.qos.logback:logback-classic:1.2.3")
+    compile("ch.qos.logback:logback-core:1.2.3")
+    compile("javax.mail:mail:1.4.7")
+    compile("javax.activation:activation:1.1.1")
 
     // Swagger
     compile("io.springfox:springfox-swagger2:2.9.2")

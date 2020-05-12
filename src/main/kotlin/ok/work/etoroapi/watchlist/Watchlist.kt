@@ -7,7 +7,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import ok.work.etoroapi.client.EtoroHttpClient
 import ok.work.etoroapi.client.websocket.EtoroLightStreamerClient
 import ok.work.etoroapi.model.PositionType
-import org.apache.xpath.operations.Bool
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.io.File
@@ -24,6 +24,8 @@ data class Asset(val id: String, val name: String, val fullName: String, var buy
 
 @Component
 class Watchlist {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     private val assetsMapIDs: MutableMap<String, EtoroAsset> = mutableMapOf()
     private val assetsMapNames: MutableMap<String, EtoroAsset> = mutableMapOf()
 
@@ -52,7 +54,7 @@ class Watchlist {
             mapper.readValue<MutableMap<String, Asset>>(json).forEach { p -> watchlist[p.key] = p.value}
             lightStreamerClient.subscribeByIds( watchlist.toList().map { pair -> pair.first })
         }
-        println(assetsMapIDs)
+        logger.info("init: $assetsMapIDs")
     }
 
     fun addAssetToWatchlistById(id: String): MutableMap<String, Asset> {
