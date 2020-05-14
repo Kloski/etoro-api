@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--https://www.baeldung.com/logback-->
+<!--https://mkyong.com/logging/logback-xml-example/-->
 <!--https://www.baeldung.com/logback-send-email-->
 <!--https://stackoverflow.com/questions/32328171/spring-boot-sending-emails-with-logback-->
 <!--https://stackoverflow.com/questions/32720891/sending-logs-to-email-using-spring-boot-->
@@ -20,13 +22,20 @@
         <password>1Charity2portaL</password>
         <to>kloska.dominik@gmail.com</to>
         <from>aj.informatika@gmail.com</from>
-        <subject>BAELDUNG: %logger{20} - %msg</subject>
-        <layout class="ch.qos.logback.classic.html.HTMLLayout" />
+        <subject>mobile widget eToro-api: %logger{20} - %msg</subject>
+        <!--        <layout class="ch.qos.logback.classic.html.HTMLLayout" />-->
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n</pattern>
+        </layout>
+        <cyclicBufferTracker class="ch.qos.logback.core.spi.CyclicBufferTracker">
+            <!-- only 5 log entries on email -->
+            <bufferSize>1</bufferSize>
+        </cyclicBufferTracker>
     </appender>
 
     <property name="LOG_FILE" value="etoro-api" />
     <property name="LOG_DIR" value="logback_logs" />
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="fileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_DIR}/${LOG_FILE}.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- daily rollover -->
@@ -40,19 +49,12 @@
         </encoder>
     </appender>
 
-    <logger name="ok.work.etoroapi" level="warn" additivity="false">
-        <appender-ref ref="emailAppender" />
-    </logger>
-
     <logger name="ok.work.etoroapi" level="info" additivity="false">
-        <appender-ref ref="FILE" />
+        <appender-ref ref="consoleAppender" />
+        <appender-ref ref="fileAppender" />
     </logger>
 
-    <root level="info">
-        <appender-ref ref="consoleAppender" />
+    <root level="WARN">
+        <appender-ref ref="emailAppender" />
     </root>
-
-    <!--    <root level="WARN">-->
-    <!--        <appender-ref ref="emailAppender" />-->
-    <!--    </root>-->
 </configuration>
