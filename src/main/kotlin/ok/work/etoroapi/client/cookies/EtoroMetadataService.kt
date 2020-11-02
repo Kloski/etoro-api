@@ -13,7 +13,6 @@ data class EtoroMetadata(val cookies: String, val lsPassword: String, val baseUr
 
 @Component
 class EtoroMetadataService(@Value("\${etoro.baseUrl}") val baseUrl: String, @Value("\${etoro.domain}") val domain: String) {
-class EtoroMetadataService {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private lateinit var cookies: String
