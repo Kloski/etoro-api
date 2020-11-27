@@ -26,6 +26,7 @@ class EtoroPositionListener : EtoroListener() {
             .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
             .configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false)
             .configure(DeserializationFeature.EAGER_DESERIALIZER_FETCH, true)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
 
     override fun onItemUpdate(itemUpdate: ItemUpdate) {
@@ -40,9 +41,11 @@ class EtoroPositionListener : EtoroListener() {
             val errorcode = transactionJson.getInt("ErrorMessageCode")
             val errormessage = if (transactionJson.has("NotificationParams")) transactionJson.getJSONObject("NotificationParams") else null
             transactionPool.addToPool(Transaction(requestToken, null, errorcode, mapper.readValue(errormessage.toString()), LocalDateTime.now()))
-        } else {
+        } else if (transactionJson.has("Position")){
             val position: EtoroPosition = mapper.readValue(transactionJson.getJSONObject("Position").toString())
             transactionPool.addToPool(Transaction(requestToken, position, 0, null, LocalDateTime.now()))
+        } else {
+            transactionPool.addToPool(Transaction(requestToken, null, 0, null, LocalDateTime.now()))
         }
     }
 }

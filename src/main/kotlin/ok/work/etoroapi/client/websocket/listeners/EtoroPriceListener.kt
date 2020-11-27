@@ -27,7 +27,10 @@ class EtoroPriceListener : EtoroListener() {
 
         if (watchlist.getById(id) !== null ) {
             watchlist.updatePrice(id, itemUpdate.getValue(2), itemUpdate.getValue(3))
+            // For some market (HKG50), the market status could be wrongly set. we assume market open when there is price update
+/*            watchlist.updateMarketStatus(id, true)*/
             watchlist.updateMarketStatus(id, itemUpdate.getValue(4)!!.toBoolean())
+
             watchlist.updateDiscounted(id, itemUpdate.getValue(16)!!.toDouble(), itemUpdate.getValue(17)!!.toDouble())
 
             val log = StringBuilder()
@@ -35,7 +38,7 @@ class EtoroPriceListener : EtoroListener() {
                 log.append("${itemUpdate.getValue(i)} | ")
             }
         val strLog = log.toString()
-        logger.info("onItemUpdate: $strLog")
+        logger.debug("onItemUpdate: $strLog")
         }
     }
 }
