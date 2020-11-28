@@ -22,15 +22,15 @@
         <password>1Charity2portaL</password>
         <to>kloska.dominik@gmail.com</to>
         <from>aj.informatika@gmail.com</from>
-        <subject>mobile widget eToro-api: %logger{20} - %msg</subject>
-        <!--        <layout class="ch.qos.logback.classic.html.HTMLLayout" />-->
-        <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n</pattern>
-        </layout>
-        <cyclicBufferTracker class="ch.qos.logback.core.spi.CyclicBufferTracker">
-            <!-- only 5 log entries on email -->
-            <bufferSize>1</bufferSize>
-        </cyclicBufferTracker>
+        <subject>eToro-api: %logger{20} - %msg</subject>
+        <layout class="ch.qos.logback.classic.html.HTMLLayout" />
+        <!--        <layout class="ch.qos.logback.classic.PatternLayout">-->
+        <!--            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n</pattern>-->
+        <!--        </layout>-->
+        <!--        <cyclicBufferTracker class="ch.qos.logback.core.spi.CyclicBufferTracker">-->
+        <!--            &lt;!&ndash; only 5 log entries on email &ndash;&gt;-->
+        <!--            <bufferSize>1</bufferSize>-->
+        <!--        </cyclicBufferTracker>-->
     </appender>
 
     <property name="LOG_FILE" value="etoro-api" />
@@ -53,6 +53,10 @@
         <appender-ref ref="consoleAppender" />
         <appender-ref ref="fileAppender" />
     </logger>
+
+<!--    <logger name="ok.work.etoroapi" level="warn">-->
+<!--        <appender-ref ref="emailAppender" />-->
+<!--    </logger>-->
 
     <root level="WARN">
         <appender-ref ref="emailAppender" />

@@ -14,6 +14,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import org.json.JSONObject
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.net.URI
@@ -50,6 +51,7 @@ data class AssetInfoResponse(val Instruments: Array<AssetInfo>)
 
 @Component
 class EtoroHttpClient {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @Autowired
     private lateinit var authorizationContext: AuthorizationContext
@@ -69,12 +71,13 @@ class EtoroHttpClient {
 
 
     fun getPersonDetail(mode: TradingMode, cid: String): UserDetail {
-        val req = prepareRequest("sapi/rankings/cid/${cid}/rankings/?Period=OneYearAgo&&client_request_id=${authorizationContext.requestId}",
+        val req = prepareRequest("sapi/rankings/cid/${cid}/rankings/?Period=OneYearAgo&client_request_id=${authorizationContext.requestId}",
                 authorizationContext.exchangeToken, mode, metadataService.getMetadata())
                 .GET()
                 .build()
 
-        val jsonObject = JSONObject(client.send(req, HttpResponse.BodyHandlers.ofString()).body())
+        val response = client.send(req, HttpResponse.BodyHandlers.ofString())
+        val jsonObject = JSONObject(response.body())
         val personData = jsonObject.getJSONObject("Data").toString()
 
         val mapper = jacksonObjectMapper()
@@ -148,6 +151,14 @@ class EtoroHttpClient {
 
         val response = JSONObject(client.send(req, HttpResponse.BodyHandlers.ofString()).body())
                 .toString()
+
+        try {
+            throw Exception("Hi There!")
+        } catch (e: Exception) {
+            logger.error("Test fail", e)
+        } finally {
+            // optional finally block
+        }
 
         return Collections.emptyList()
     }
