@@ -32,6 +32,8 @@ out/
 
 ### VS Code ###
 .vscode/
-/src/main/resources/application-personal.yaml
 
 watchlist.json
+/src/main/resources/application-personal.yaml
+/src/main/resources/logback_private.xml
+etoro-api.*.gz
