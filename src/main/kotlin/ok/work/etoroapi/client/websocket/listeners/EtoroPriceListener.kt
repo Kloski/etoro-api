@@ -7,6 +7,7 @@ import ok.work.etoroapi.client.websocket.subscriptionFields
 import ok.work.etoroapi.watchlist.Watchlist
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Component
 
 @Component
@@ -15,6 +16,9 @@ class EtoroPriceListener : EtoroListener() {
 
     @Autowired
     lateinit var watchlist: Watchlist
+
+    @Autowired
+    lateinit var simpMessagingTemplate: SimpMessagingTemplate
 
     override fun onListenEnd(subscription: Subscription) {
         val subscriptionJsonStr = jacksonObjectMapper().writeValueAsString(subscription)
@@ -25,7 +29,7 @@ class EtoroPriceListener : EtoroListener() {
     override fun onItemUpdate(itemUpdate: ItemUpdate) {
         val id = itemUpdate.itemName.replace("instrument:", "")
 
-        if (watchlist.getById(id) !== null ) {
+        if (watchlist.getById(id) !== null) {
             watchlist.updatePrice(id, itemUpdate.getValue(2), itemUpdate.getValue(3))
             // For some market (HKG50), the market status could be wrongly set. we assume market open when there is price update
 /*            watchlist.updateMarketStatus(id, true)*/
@@ -34,11 +38,16 @@ class EtoroPriceListener : EtoroListener() {
             watchlist.updateDiscounted(id, itemUpdate.getValue(16)!!.toDouble(), itemUpdate.getValue(17)!!.toDouble())
 
             val log = StringBuilder()
+            var update = HashMap<String, String>()
             for (i in 1..subscriptionFields.size) {
+                update.put(subscriptionFields[i-1], itemUpdate.getValue(i))
                 log.append("${itemUpdate.getValue(i)} | ")
             }
         val strLog = log.toString()
         logger.debug("onItemUpdate: $strLog")
+            simpMessagingTemplate.convertAndSend("/api/price", update)
         }
     }
 }
+}
+
