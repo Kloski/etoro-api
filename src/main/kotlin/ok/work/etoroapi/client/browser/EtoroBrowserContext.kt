@@ -3,6 +3,7 @@ package ok.work.etoroapi.client.browser
 import ok.work.etoroapi.config.UserDataProperties
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -15,6 +16,7 @@ data class EtoroMetadata(val cookies: String, val token: String, val lsPassword:
 
 @Component
 class EtoroMetadataService(@Value("\${etoro.baseUrl}") val baseUrl: String, @Value("\${etoro.domain}") val domain: String) {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @Autowired
     private lateinit var userData: UserDataProperties
@@ -42,7 +44,9 @@ class EtoroMetadataService(@Value("\${etoro.baseUrl}") val baseUrl: String, @Val
 
         opts = ChromeOptions()
         System.setProperty("webdriver.chrome.driver", pathToDriver)
-        opts.addArguments("start-maximized")
+//        opts.addArguments("start-maximized")
+        opts.addArguments("--headless")
+        opts.addArguments("--no-sandbox")
         opts.addArguments("--disable-blink-features=AutomationControlled")
         login()
     }
@@ -63,7 +67,7 @@ class EtoroMetadataService(@Value("\${etoro.baseUrl}") val baseUrl: String, @Val
         while (true) {
             try {
                 token = driver.executeScript("return JSON.parse(atob(window.localStorage.loginData)).stsData_app_1.accessToken;") as String
-                println("Token retrieved after %d seconds".format(seconds))
+                logger.info("Token retrieved after %d seconds".format(seconds))
                 break
             } catch (e: Exception) {
                 if (seconds > 5) {
@@ -74,11 +78,11 @@ class EtoroMetadataService(@Value("\${etoro.baseUrl}") val baseUrl: String, @Val
             }
         }
         expirationTime = Date(driver.executeScript("return JSON.parse(atob(window.localStorage.loginData)).stsData_app_1.expirationUnixTimeMs;") as Long)
-        println(token)
-        println("expires at: $expirationTime")
+        logger.info(token)
+        logger.info("expires at: $expirationTime")
         val cookiesSet = driver.manage().cookies
         cookies = cookiesSet.toList().joinToString("; ") { cookie -> "${cookie.name}=${cookie.value}" }
-        println("cookies: $cookies")
+        logger.info("cookies: $cookies")
 
         driver.quit()
     }
