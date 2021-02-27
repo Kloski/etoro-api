@@ -35,7 +35,6 @@ class EtoroPositionListener : EtoroListener() {
     override fun onItemUpdate(itemUpdate: ItemUpdate) {
         val itemUpdateJsonStr = mapper.writeValueAsString(itemUpdate)
         logger.warn("onItemUpdate: $itemUpdateJsonStr")
-        // println(itemUpdate.getValue(1))
 
         val transactionJson = JSONObject(JSONObject(itemUpdate.getValue(1)).getString("Content"))
         val requestToken = transactionJson.getString("RequestToken")

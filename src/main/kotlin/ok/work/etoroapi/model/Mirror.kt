@@ -55,7 +55,7 @@ data class MirrorWithPositions(
     val withdrawalSummary: Double,
 
     @JsonProperty("Positions")
-    val positions: List<Position>,
+    val positions: List<MirrorPosition>,
 
     @JsonProperty("EntryOrders")
     val entryOrders: List<Any?>,
@@ -79,7 +79,7 @@ data class MirrorWithPositions(
     val parentMirrors: List<Any?>
 )
 
-data class Position(
+data class MirrorPosition(
     @JsonProperty("PositionID")
     val positionID: Long,
 
