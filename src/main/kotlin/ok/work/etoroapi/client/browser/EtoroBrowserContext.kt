@@ -1,7 +1,9 @@
 package ok.work.etoroapi.client.browser
 
+import ok.work.etoroapi.config.UserDataProperties
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.lang.RuntimeException
@@ -13,6 +15,9 @@ data class EtoroMetadata(val cookies: String, val token: String, val lsPassword:
 
 @Component
 class EtoroMetadataService(@Value("\${etoro.baseUrl}") val baseUrl: String, @Value("\${etoro.domain}") val domain: String) {
+
+    @Autowired
+    private lateinit var userData: UserDataProperties
 
     private lateinit var cookies: String
     private lateinit var token: String
@@ -46,8 +51,8 @@ class EtoroMetadataService(@Value("\${etoro.baseUrl}") val baseUrl: String, @Val
         driver = ChromeDriver(opts)
 
         driver.get("$baseUrl/login")
-        val email = System.getenv("LOGIN")
-        val password = System.getenv("PASSWORD")
+        val email = userData.email
+        val password = userData.pass
         if (email == null || password == null) {
             throw RuntimeException("LOGIN and/or PASSWORD environment variables are missing")
         }

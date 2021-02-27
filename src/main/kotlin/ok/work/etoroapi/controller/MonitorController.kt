@@ -3,9 +3,8 @@ package ok.work.etoroapi.controller
 import ok.work.etoroapi.client.EtoroHttpClient
 import ok.work.etoroapi.client.EtoroMirrors
 import ok.work.etoroapi.client.EtoroPosition
-import ok.work.etoroapi.model.UserDetail
-import ok.work.etoroapi.config.UserDataProperties
 import ok.work.etoroapi.model.DailyChartData
+import ok.work.etoroapi.model.UserDetail
 import ok.work.etoroapi.model.YearMonthPerformance
 import ok.work.etoroapi.model.ofString
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,9 +17,6 @@ class MonitorController {
 
     @Autowired
     lateinit var httpClient: EtoroHttpClient
-
-    @Autowired
-    private lateinit var userData: UserDataProperties
 
 
     @GetMapping("/detail")

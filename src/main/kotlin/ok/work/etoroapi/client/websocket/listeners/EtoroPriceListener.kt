@@ -43,11 +43,10 @@ class EtoroPriceListener : EtoroListener() {
                 update.put(subscriptionFields[i-1], itemUpdate.getValue(i))
                 log.append("${itemUpdate.getValue(i)} | ")
             }
-        val strLog = log.toString()
-        logger.debug("onItemUpdate: $strLog")
+        logger.debug("onItemUpdate: $log.toString()")
             simpMessagingTemplate.convertAndSend("/api/price", update)
         }
     }
 }
-}
+
 

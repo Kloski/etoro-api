@@ -25,7 +25,6 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
-import java.util.*
 
 data class ViewContext(val ClientViewRate: Double)
 
@@ -135,8 +134,8 @@ class EtoroHttpClient {
     }
 
     fun getPersonDetail(mode: TradingMode, cid: String): UserDetail {
-        val req = prepareRequest("sapi/rankings/cid/${cid}/rankings/?Period=OneYearAgo&client_request_id=${authorizationContext.requestId}",
-                authorizationContext.exchangeToken, mode, metadataService.getMetadata())
+        val req = prepareRequest("sapi/rankings/cid/${cid}/rankings/?Period=OneYearAgo&client_request_id=${userContext.requestId}",
+            userContext.exchangeToken, mode, metadataService.getMetadata())
                 .GET()
                 .build()
 
@@ -152,8 +151,8 @@ class EtoroHttpClient {
     }
 
     fun getPersonHistory(mode: TradingMode, cid: String): YearMonthPerformance {
-        val req = prepareRequest("sapi/userstats/gain/cid/${cid}/history?IncludeSimulation=true&&client_request_id=${authorizationContext.requestId}",
-                authorizationContext.exchangeToken, mode, metadataService.getMetadata())
+        val req = prepareRequest("sapi/userstats/gain/cid/${cid}/history?IncludeSimulation=true&&client_request_id=${userContext.requestId}",
+                userContext.exchangeToken, mode, metadataService.getMetadata())
                 .GET()
                 .build()
 
@@ -167,8 +166,8 @@ class EtoroHttpClient {
     }
 
     fun getPersonDailyChartData(mode: TradingMode, userName: String, period: String?): DailyChartData {
-        val req = prepareRequest("sapi/userstats/CopySim/Username/${userName}/${if (period != null) period else "OneYearAgo"}?callback=angular.callbacks._1&client_request_id=${authorizationContext.requestId}",
-                authorizationContext.exchangeToken, mode, metadataService.getMetadata())
+        val req = prepareRequest("sapi/userstats/CopySim/Username/${userName}/${if (period != null) period else "OneYearAgo"}?callback=angular.callbacks._1&client_request_id=${userContext.requestId}",
+                userContext.exchangeToken, mode, metadataService.getMetadata())
                 .GET()
                 .build()
 
@@ -188,8 +187,8 @@ class EtoroHttpClient {
     }
 
     fun getPersonData(mode: TradingMode, cid: String): List<EtoroMirrors> {
-        val req = prepareRequest("sapi/trade-data-real/live/public/portfolios?cid=${cid}&client_request_id=${authorizationContext.requestId}",
-                authorizationContext.exchangeToken, mode, metadataService.getMetadata())
+        val req = prepareRequest("sapi/trade-data-real/live/public/portfolios?cid=${cid}&client_request_id=${userContext.requestId}",
+                userContext.exchangeToken, mode, metadataService.getMetadata())
                 .GET()
                 .build()
 
@@ -208,8 +207,8 @@ class EtoroHttpClient {
      * Copy user detail data - not so useful
      */
     fun getPersonDataData(mode: TradingMode, cidList: String): List<EtoroPosition> {
-        val req = prepareRequest("api/logininfo/v1.1/aggregatedInfo?avatar=false&cidList=%5B${cidList}%5D&client_request_id=${authorizationContext.requestId}&realcid=true",
-                authorizationContext.exchangeToken, mode, metadataService.getMetadata())
+        val req = prepareRequest("api/logininfo/v1.1/aggregatedInfo?avatar=false&cidList=%5B${cidList}%5D&client_request_id=${userContext.requestId}&realcid=true",
+                userContext.exchangeToken, mode, metadataService.getMetadata())
                 .GET()
                 .build()
 
@@ -224,7 +223,7 @@ class EtoroHttpClient {
             // optional finally block
         }
 
-        return Collections.emptyList()
+        return emptyList()
     }
 
     fun getPositions(mode: TradingMode): List<EtoroPosition> {
@@ -236,8 +235,7 @@ class EtoroHttpClient {
                 .GET()
                 .build()
 
-        val logindataJsonObject = JSONObject(client.send(req, HttpResponse.BodyHandlers.ofString()).body())
-        val response = logindataJsonObject
+        val response = JSONObject(client.send(req, HttpResponse.BodyHandlers.ofString()).body())
                 .getJSONObject("AggregatedResult")
                 .getJSONObject("ApiResponses")
                 .getJSONObject("PrivatePortfolio")
