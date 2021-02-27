@@ -30,43 +30,51 @@ data class ViewContext(val ClientViewRate: Double)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class EtoroPosition(
-        val PositionID: String?,
-        val InstrumentID: String,
-        val IsBuy: Boolean,
-        val Leverage: Int,
-        val StopLossRate: Double,
-        val TakeProfitRate: Double,
-        val IsTslEnabled: Boolean,
-        val View_MaxPositionUnits: Int,
-        val View_Units: Double,
-        val View_openByUnits: Boolean?,
-        val Amount: Double,
-        val ViewRateContext: ViewContext?,
-        val OpenDateTime: String?,
-        val IsDiscounted: Boolean?,
-        val OpenRate: Double?,
-        val CloseRate: Double?,
-        val NetProfit: Double?,
-        val CloseDateTime: String?
+    val PositionID: String?,
+    val InstrumentID: String,
+    val IsBuy: Boolean,
+    val Leverage: Int,
+    val StopLossRate: Double,
+    val TakeProfitRate: Double,
+    val IsTslEnabled: Boolean,
+    val View_MaxPositionUnits: Int,
+    val View_Units: Double,
+    val View_openByUnits: Boolean?,
+    val Amount: Double,
+    val ViewRateContext: ViewContext?,
+    val OpenDateTime: String?,
+    val IsDiscounted: Boolean?,
+    val OpenRate: Double?,
+    val CloseRate: Double?,
+    val NetProfit: Double?,
+    val CloseDateTime: String?
 )
 
 data class EtoroPositionForOpen(
-        val PositionID: String?, val InstrumentID: String, val IsBuy: Boolean, val Leverage: Int,
-        val StopLossRate: Double, val TakeProfitRate: Double, val IsTslEnabled: Boolean,
-        val View_MaxPositionUnits: Int, val View_Units: Double, val View_openByUnits: Boolean?,
-        val Amount: Double, val ViewRateContext: ViewContext?, val OpenDateTime: String?, val IsDiscounted: Boolean?
+    val PositionID: String?, val InstrumentID: String, val IsBuy: Boolean, val Leverage: Int,
+    val StopLossRate: Double, val TakeProfitRate: Double, val IsTslEnabled: Boolean,
+    val View_MaxPositionUnits: Int, val View_Units: Double, val View_openByUnits: Boolean?,
+    val Amount: Double, val ViewRateContext: ViewContext?, val OpenDateTime: String?, val IsDiscounted: Boolean?
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class EtoroPositionForUpdate(
-        val PositionID: String,
-        val StopLossRate: Double?,
-        val TakeProfitRate: Double?,
-        val IsTslEnabled: Boolean?
+    val PositionID: String,
+    val StopLossRate: Double?,
+    val TakeProfitRate: Double?,
+    val IsTslEnabled: Boolean?
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class EtoroMirrors(val Invested: Double, val NetProfit: Double, val PendingForClosure: Boolean, val MirrorID: Long, val Value: Double, val ParentCID: Long, val ParentUsername: String)
+data class EtoroMirrors(
+    val Invested: Double,
+    val NetProfit: Double,
+    val PendingForClosure: Boolean,
+    val MirrorID: Long,
+    val Value: Double,
+    val ParentCID: Long,
+    val ParentUsername: String
+)
 
 data class AssetInfoRequest(val instrumentIds: Array<String>)
 
@@ -97,9 +105,9 @@ class EtoroHttpClient {
 
     fun getInstruments(): List<EtoroFullAsset> {
         val req = HttpRequest.newBuilder()
-                .uri(URI("https://api.etorostatic.com/sapi/instrumentsmetadata/V1.1/instruments/bulk?bulkNumber=1&cv=77286b759effc7a624555e466cfb7c86_48a07d20d16ee784216c9eed65623d62&totalBulks=1"))
-                .GET()
-                .build()
+            .uri(URI("https://api.etorostatic.com/sapi/instrumentsmetadata/V1.1/instruments/bulk?bulkNumber=1&cv=77286b759effc7a624555e466cfb7c86_48a07d20d16ee784216c9eed65623d62&totalBulks=1"))
+            .GET()
+            .build()
         if (cachedInstruments.isEmpty()) {
             val response = client.send(req, HttpResponse.BodyHandlers.ofString()).body()
             val jsonArray: JSONArray = JSONObject(response).getJSONArray("InstrumentDisplayDatas")
@@ -122,10 +130,10 @@ class EtoroHttpClient {
                     id = item.getInt("InstrumentID").toString()
                 }
                 val asset = EtoroFullAsset(
-                        id,
-                        item.getString("SymbolFull"),
-                        item.getString("InstrumentDisplayName"),
-                        imageList.toList()
+                    id,
+                    item.getString("SymbolFull"),
+                    item.getString("InstrumentDisplayName"),
+                    imageList.toList()
                 )
                 cachedInstruments.add(asset)
             }
@@ -134,42 +142,48 @@ class EtoroHttpClient {
     }
 
     fun getPersonDetail(mode: TradingMode, cid: String): UserDetail {
-        val req = prepareRequest("sapi/rankings/cid/${cid}/rankings/?Period=OneYearAgo&client_request_id=${userContext.requestId}",
-            userContext.exchangeToken, mode, metadataService.getMetadata())
-                .GET()
-                .build()
+        val req = prepareRequest(
+            "sapi/rankings/cid/${cid}/rankings/?Period=OneYearAgo&client_request_id=${userContext.requestId}",
+            userContext.exchangeToken, mode, metadataService.getMetadata()
+        )
+            .GET()
+            .build()
 
         val response = client.send(req, HttpResponse.BodyHandlers.ofString())
         val jsonObject = JSONObject(response.body())
         val personData = jsonObject.getJSONObject("Data").toString()
 
         val mapper = jacksonObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
         val result: UserDetail = mapper.readValue(personData)
         return result
     }
 
     fun getPersonHistory(mode: TradingMode, cid: String): YearMonthPerformance {
-        val req = prepareRequest("sapi/userstats/gain/cid/${cid}/history?IncludeSimulation=true&&client_request_id=${userContext.requestId}",
-                userContext.exchangeToken, mode, metadataService.getMetadata())
-                .GET()
-                .build()
+        val req = prepareRequest(
+            "sapi/userstats/gain/cid/${cid}/history?IncludeSimulation=true&&client_request_id=${userContext.requestId}",
+            userContext.exchangeToken, mode, metadataService.getMetadata()
+        )
+            .GET()
+            .build()
 
         val jsonStr = client.send(req, HttpResponse.BodyHandlers.ofString()).body()
 
         val mapper = jacksonObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
         val result: YearMonthPerformance = mapper.readValue(jsonStr)
         return result
     }
 
     fun getPersonDailyChartData(mode: TradingMode, userName: String, period: String?): DailyChartData {
-        val req = prepareRequest("sapi/userstats/CopySim/Username/${userName}/${if (period != null) period else "OneYearAgo"}?callback=angular.callbacks._1&client_request_id=${userContext.requestId}",
-                userContext.exchangeToken, mode, metadataService.getMetadata())
-                .GET()
-                .build()
+        val req = prepareRequest(
+            "sapi/userstats/CopySim/Username/${userName}/${if (period != null) period else "OneYearAgo"}?callback=angular.callbacks._1&client_request_id=${userContext.requestId}",
+            userContext.exchangeToken, mode, metadataService.getMetadata()
+        )
+            .GET()
+            .build()
 
         val jsonStr = client.send(req, HttpResponse.BodyHandlers.ofString()).body()
         val substringAfter = jsonStr.substringAfter('{')
@@ -180,40 +194,60 @@ class EtoroHttpClient {
 
 
         val mapper = jacksonObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
         val result: DailyChartData = mapper.readValue(chartData.get(periodName).toString())
         return result
     }
 
     fun getPersonData(mode: TradingMode, cid: String): List<EtoroMirrors> {
         val req = prepareRequest("sapi/trade-data-real/live/public/portfolios?cid=${cid}&client_request_id=${userContext.requestId}",
-                userContext.exchangeToken, mode, metadataService.getMetadata())
-                .GET()
-                .build()
+            userContext.exchangeToken, mode, metadataService.getMetadata()
+        )
+            .GET()
+            .build()
 
         val jsonObject = JSONObject(client.send(req, HttpResponse.BodyHandlers.ofString()).body())
         val copyPersons = jsonObject.getJSONArray("AggregatedMirrors").toString()
         val aggregatedPositions = jsonObject.getJSONArray("AggregatedPositions").toString()
 
         val mapper = jacksonObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
         val result: List<EtoroMirrors> = mapper.readValue(copyPersons)
         return result
+    }
+
+    fun getPortfolioShares(mode: TradingMode, cid: String): List<MirrorWithPositions> {
+        val response = JSONObject(getAllLoginData(mode))
+            .getJSONObject("AggregatedResult")
+            .getJSONObject("ApiResponses")
+            .getJSONObject("PrivatePortfolio")
+            .getJSONObject("Content")
+            .getJSONObject("ClientPortfolio")
+            .getJSONArray("Mirrors")
+            .toString()
+
+        val mapper = jacksonObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
+
+        val positions: List<MirrorWithPositions> = mapper.readValue(response)
+        return positions.filter { cid.equals(it.parentCID.toString()) }
     }
 
     /**
      * Copy user detail data - not so useful
      */
     fun getPersonDataData(mode: TradingMode, cidList: String): List<EtoroPosition> {
-        val req = prepareRequest("api/logininfo/v1.1/aggregatedInfo?avatar=false&cidList=%5B${cidList}%5D&client_request_id=${userContext.requestId}&realcid=true",
-                userContext.exchangeToken, mode, metadataService.getMetadata())
-                .GET()
-                .build()
+        val req = prepareRequest(
+            "api/logininfo/v1.1/aggregatedInfo?avatar=false&cidList=%5B${cidList}%5D&client_request_id=${userContext.requestId}&realcid=true",
+            userContext.exchangeToken, mode, metadataService.getMetadata()
+        )
+            .GET()
+            .build()
 
         val response = JSONObject(client.send(req, HttpResponse.BodyHandlers.ofString()).body())
-                .toString()
+            .toString()
 
         try {
             throw Exception("Hi There!")
@@ -226,26 +260,30 @@ class EtoroHttpClient {
         return emptyList()
     }
 
-    fun getPositions(mode: TradingMode): List<EtoroPosition> {
+    fun getAllLoginData(mode: TradingMode): String {
         val req = prepareRequest(
-                "api/logininfo/v1.1/logindata?" +
-                        "client_request_id=${userContext.requestId}&conditionIncludeDisplayableInstruments=false&conditionIncludeMarkets=false&conditionIncludeMetadata=false&conditionIncludeMirrorValidation=false",
-                userContext.exchangeToken, mode, metadataService.getMetadata()
+            "api/logininfo/v1.1/logindata?" +
+                    "client_request_id=${userContext.requestId}&conditionIncludeDisplayableInstruments=false&conditionIncludeMarkets=false&conditionIncludeMetadata=false&conditionIncludeMirrorValidation=false",
+            userContext.exchangeToken, mode, metadataService.getMetadata()
         )
-                .GET()
-                .build()
+            .GET()
+            .build()
 
-        val response = JSONObject(client.send(req, HttpResponse.BodyHandlers.ofString()).body())
-                .getJSONObject("AggregatedResult")
-                .getJSONObject("ApiResponses")
-                .getJSONObject("PrivatePortfolio")
-                .getJSONObject("Content")
-                .getJSONObject("ClientPortfolio")
-                .getJSONArray("Positions")
-                .toString()
+        return client.send(req, HttpResponse.BodyHandlers.ofString()).body()
+    }
+
+    fun getPositions(mode: TradingMode): List<EtoroPosition> {
+        val response = JSONObject(getAllLoginData(mode))
+            .getJSONObject("AggregatedResult")
+            .getJSONObject("ApiResponses")
+            .getJSONObject("PrivatePortfolio")
+            .getJSONObject("Content")
+            .getJSONObject("ClientPortfolio")
+            .getJSONArray("Positions")
+            .toString()
 
         val mapper = jacksonObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
+            .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
 
         val positions: List<EtoroPosition> = mapper.readValue(response)
         return positions.map {
@@ -254,14 +292,14 @@ class EtoroHttpClient {
             if (watchlist.getById(instrumentId) != null) {
                 if (it.IsBuy) {
                     val price = watchlist.getPrice(
-                            instrumentId,
-                            PositionType.SELL,
-                            assetInfo.getBoolean("AllowDiscountedRates")
+                        instrumentId,
+                        PositionType.SELL,
+                        assetInfo.getBoolean("AllowDiscountedRates")
                     )
                     it.copy(NetProfit = (price - it.OpenRate!!) * it.Leverage * it.Amount / it.OpenRate)
                 } else {
                     val price =
-                            watchlist.getPrice(instrumentId, PositionType.BUY, assetInfo.getBoolean("AllowDiscountedRates"))
+                        watchlist.getPrice(instrumentId, PositionType.BUY, assetInfo.getBoolean("AllowDiscountedRates"))
                     it.copy(NetProfit = (it.OpenRate!! - price) * it.Leverage * it.Amount / it.OpenRate)
                 }
             } else {
@@ -289,7 +327,7 @@ class EtoroHttpClient {
             .getJSONObject("Content")
             .getJSONObject("ClientPortfolio")
             .getJSONArray("Mirrors")
-        val hasUserData =  loginData.getJSONObject("AggregatedResult")
+        val hasUserData = loginData.getJSONObject("AggregatedResult")
             .getJSONObject("ApiResponses")
             .getJSONObject("MirrorsUserData")
             .getInt("StatusCode") == 200
@@ -351,36 +389,36 @@ class EtoroHttpClient {
     }
 
     fun getHistoryPositions(
-            limit: String = "100",
-            page: String = "1",
-            StartTime: String = "",
-            mode: TradingMode
+        limit: String = "100",
+        page: String = "1",
+        StartTime: String = "",
+        mode: TradingMode
     ): List<EtoroPosition> {
         val req = prepareRequest(
-                "sapi/trade-data-${mode.name.toLowerCase()}/history/private/credit/flat?ItemsPerPage=$limit&PageNumber=$page&StartTime=$StartTime",
-                userContext.exchangeToken, mode, metadataService.getMetadata()
+            "sapi/trade-data-${mode.name.toLowerCase()}/history/private/credit/flat?ItemsPerPage=$limit&PageNumber=$page&StartTime=$StartTime",
+            userContext.exchangeToken, mode, metadataService.getMetadata()
         )
-                .GET()
-                .build()
+            .GET()
+            .build()
 
         val response = JSONObject(client.send(req, HttpResponse.BodyHandlers.ofString()).body())
-                .getJSONArray("HistoryPositions")
-                .toString()
+            .getJSONArray("HistoryPositions")
+            .toString()
 
         val mapper = jacksonObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
+            .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
         return mapper.readValue(response)
     }
 
     fun getInstrumentIDs(): List<EtoroAsset> {
         val req = HttpRequest.newBuilder()
-                .uri(URI("https://api.etorostatic.com/sapi/instrumentsmetadata/V1.1/instruments?cv=1c85198476a3b802326706d0c583e99b_beb3f4faa55c3a46ed44fc6d763db563"))
-                .GET()
-                .build()
+            .uri(URI("https://api.etorostatic.com/sapi/instrumentsmetadata/V1.1/instruments?cv=1c85198476a3b802326706d0c583e99b_beb3f4faa55c3a46ed44fc6d763db563"))
+            .GET()
+            .build()
 
         val response =
-                JSONObject(client.send(req, HttpResponse.BodyHandlers.ofString()).body()).get("InstrumentDisplayDatas")
-                        .toString()
+            JSONObject(client.send(req, HttpResponse.BodyHandlers.ofString()).body()).get("InstrumentDisplayDatas")
+                .toString()
         val mapper = jacksonObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
         return mapper.readValue(response)
@@ -407,7 +445,7 @@ class EtoroHttpClient {
         if (position.type == PositionType.SELL) {
             when {
                 position.stopLossAmountRate > 0.0 -> position.stopLossRate =
-                        price + (price * position.stopLossAmountRate / 100) / position.leverage
+                    price + (price * position.stopLossAmountRate / 100) / position.leverage
                 position.stopLossRate > 0.0 -> position.stopLossRate = price + (price * position.stopLossRate / 100)
                 position.stopLoss > 0.0 -> position.stopLossRate = position.stopLoss
                 else -> {
@@ -418,9 +456,9 @@ class EtoroHttpClient {
 
             when {
                 position.takeProfitAmountRate > 0.0 -> position.takeProfitRate =
-                        price - (price * position.takeProfitAmountRate / 100) / position.leverage
+                    price - (price * position.takeProfitAmountRate / 100) / position.leverage
                 position.takeProfitRate > 0.0 -> position.takeProfitRate =
-                        price - (price * position.takeProfitRate / 100)
+                    price - (price * position.takeProfitRate / 100)
                 position.takeProfit > 0.0 -> position.takeProfitRate = position.takeProfit
                 else -> {
                     position.takeProfitRate = price - (price * 50 / 100)
@@ -429,7 +467,7 @@ class EtoroHttpClient {
         } else if (position.type == PositionType.BUY) {
             when {
                 position.stopLossAmountRate > 0.0 -> position.stopLossRate =
-                        price - (price * position.stopLossAmountRate / 100) / position.leverage
+                    price - (price * position.stopLossAmountRate / 100) / position.leverage
                 position.stopLossRate > 0.0 -> position.stopLossRate = price - (price * position.stopLossRate / 100)
                 position.stopLoss > 0.0 -> position.stopLossRate = position.stopLoss
                 else -> {
@@ -439,9 +477,9 @@ class EtoroHttpClient {
             }
             when {
                 position.takeProfitAmountRate > 0.0 -> position.takeProfitRate =
-                        price + (price * position.takeProfitAmountRate / 100) / position.leverage
+                    price + (price * position.takeProfitAmountRate / 100) / position.leverage
                 position.takeProfitRate > 0.0 -> position.takeProfitRate =
-                        price + (price * position.takeProfitRate / 100)
+                    price + (price * position.takeProfitRate / 100)
                 position.takeProfit > 0.0 -> position.takeProfitRate = position.takeProfit
                 else -> {
                     position.takeProfitRate = price + (price * 50 / 100)
@@ -453,30 +491,30 @@ class EtoroHttpClient {
         position.stopLossRate = position.stopLossRate.round(assetInfo.getInt("Precision"))
 
         val positionRequestBody = EtoroPositionForOpen(
-                null,
-                instrumentId,
-                type,
-                position.leverage,
-                position.stopLossRate,
-                position.takeProfitRate,
-                position.tsl,
-                assetInfo.getInt("MaxPositionUnits"),
-                0.01,
-                false,
-                position.amount,
-                ViewContext(price),
-                null,
-                assetInfo.getBoolean("AllowDiscountedRates")
+            null,
+            instrumentId,
+            type,
+            position.leverage,
+            position.stopLossRate,
+            position.takeProfitRate,
+            position.tsl,
+            assetInfo.getInt("MaxPositionUnits"),
+            0.01,
+            false,
+            position.amount,
+            ViewContext(price),
+            null,
+            assetInfo.getBoolean("AllowDiscountedRates")
         )
 
         val req = prepareRequest(
-                "sapi/trade-${mode.name.toLowerCase()}/positions?client_request_id=${userContext.requestId}",
-                userContext.exchangeToken,
-                mode,
-                metadataService.getMetadata()
+            "sapi/trade-${mode.name.toLowerCase()}/positions?client_request_id=${userContext.requestId}",
+            userContext.exchangeToken,
+            mode,
+            metadataService.getMetadata()
         )
-                .POST(HttpRequest.BodyPublishers.ofString(JSONObject(positionRequestBody).toString()))
-                .build()
+            .POST(HttpRequest.BodyPublishers.ofString(JSONObject(positionRequestBody).toString()))
+            .build()
         val body = client.send(req, HttpResponse.BodyHandlers.ofString()).body()
 
         val transactionId = JSONObject(body).getString("Token")
@@ -488,13 +526,13 @@ class EtoroHttpClient {
         val requestBody = JSONObject(positionRequestBody)
 
         val req = prepareRequest(
-                "sapi/trade-${mode.name.toLowerCase()}/positions/$id?client_request_id=${userContext.requestId}",
-                userContext.exchangeToken,
-                mode,
-                metadataService.getMetadata()
+            "sapi/trade-${mode.name.toLowerCase()}/positions/$id?client_request_id=${userContext.requestId}",
+            userContext.exchangeToken,
+            mode,
+            metadataService.getMetadata()
         )
-                .PUT(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
-                .build()
+            .PUT(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
+            .build()
 
         val body = client.send(req, HttpResponse.BodyHandlers.ofString()).body()
         val transactionId = JSONObject(body).getString("Token")
@@ -503,10 +541,10 @@ class EtoroHttpClient {
 
     fun deletePosition(id: String, mode: TradingMode) {
         val req = prepareOkRequest(
-                "sapi/trade-${mode.name.toLowerCase()}/positions/$id?PositionID=$id&client_request_id=${userContext.requestId}",
-                userContext.exchangeToken,
-                mode,
-                metadataService.getMetadata()
+            "sapi/trade-${mode.name.toLowerCase()}/positions/$id?PositionID=$id&client_request_id=${userContext.requestId}",
+            userContext.exchangeToken,
+            mode,
+            metadataService.getMetadata()
         )
         req.delete("{}".toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull()))
 
@@ -530,31 +568,31 @@ class EtoroHttpClient {
     fun getAssetInfo(id: String, mode: TradingMode): JSONObject {
         val body = AssetInfoRequest(arrayOf(id))
         val req = prepareRequest(
-                "sapi/trade-real/instruments/private/index?client_request_id=${userContext.requestId}",
-                userContext.exchangeToken, mode, metadataService.getMetadata()
+            "sapi/trade-real/instruments/private/index?client_request_id=${userContext.requestId}",
+            userContext.exchangeToken, mode, metadataService.getMetadata()
         )
-                .POST(HttpRequest.BodyPublishers.ofString(JSONObject(body).toString()))
-                .build()
+            .POST(HttpRequest.BodyPublishers.ofString(JSONObject(body).toString()))
+            .build()
         return JSONObject(client.send(req, HttpResponse.BodyHandlers.ofString()).body()).getJSONArray("Instruments")
-                .getJSONObject(0)
+            .getJSONObject(0)
     }
 
     fun getCash(mode: TradingMode): Double {
         val req = prepareRequest(
-                "api/logininfo/v1.1/logindata?" +
-                        "client_request_id=${userContext.requestId}&conditionIncludeDisplayableInstruments=false&conditionIncludeMarkets=false&conditionIncludeMetadata=false&conditionIncludeMirrorValidation=false",
-                userContext.exchangeToken, mode, metadataService.getMetadata()
+            "api/logininfo/v1.1/logindata?" +
+                    "client_request_id=${userContext.requestId}&conditionIncludeDisplayableInstruments=false&conditionIncludeMarkets=false&conditionIncludeMetadata=false&conditionIncludeMirrorValidation=false",
+            userContext.exchangeToken, mode, metadataService.getMetadata()
         )
-                .GET()
-                .build()
+            .GET()
+            .build()
 
         return JSONObject(client.send(req, HttpResponse.BodyHandlers.ofString()).body())
-                .getJSONObject("AggregatedResult")
-                .getJSONObject("ApiResponses")
-                .getJSONObject("PrivatePortfolio")
-                .getJSONObject("Content")
-                .getJSONObject("ClientPortfolio")
-                .getDouble("Credit")
+            .getJSONObject("AggregatedResult")
+            .getJSONObject("ApiResponses")
+            .getJSONObject("PrivatePortfolio")
+            .getJSONObject("Content")
+            .getJSONObject("ClientPortfolio")
+            .getDouble("Credit")
     }
 
 }

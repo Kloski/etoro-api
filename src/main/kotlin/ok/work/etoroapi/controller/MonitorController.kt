@@ -3,10 +3,7 @@ package ok.work.etoroapi.controller
 import ok.work.etoroapi.client.EtoroHttpClient
 import ok.work.etoroapi.client.EtoroMirrors
 import ok.work.etoroapi.client.EtoroPosition
-import ok.work.etoroapi.model.DailyChartData
-import ok.work.etoroapi.model.UserDetail
-import ok.work.etoroapi.model.YearMonthPerformance
-import ok.work.etoroapi.model.ofString
+import ok.work.etoroapi.model.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 
@@ -37,6 +34,11 @@ class MonitorController {
     @GetMapping("/portfolio")
     fun getMonitoredPersonData(@RequestHeader(defaultValue = "Demo") mode: String, @RequestParam cid: String): List<EtoroMirrors> {
         return httpClient.getPersonData(ofString(mode), cid)
+    }
+
+    @GetMapping("/shares")
+    fun getMonitoredPersonShares(@RequestHeader(defaultValue = "Demo") mode: String, @RequestParam cid: String): List<MirrorWithPositions> {
+        return httpClient.getPortfolioShares(ofString(mode), cid)
     }
 
 
