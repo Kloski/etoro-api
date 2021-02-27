@@ -34,6 +34,7 @@ out/
 .vscode/
 
 watchlist.json
+/.env
 /src/main/resources/application-personal.yaml
 /src/main/resources/logback_private.xml
 etoro-api.*.gz

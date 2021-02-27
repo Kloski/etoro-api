@@ -1,6 +1,11 @@
 ### Etoro trading API
 ![CI Docker Image Build](https://github.com/mkjiau/etoro-api/workflows/CI%20Docker%20Image%20Build/badge.svg?branch=master)
 
+#### Support project:
+BTC: 3FRPsX4QsNNFzKZwtXh92JfKeetWJcn3SY
+
+ETH: 0x8134888B3429aea645b34fcd576842a204d9C9aE
+
 ##### Requirments:
 - java 11 (JDK11)
 - Google Chrome (tested on version 78)
@@ -130,10 +135,4 @@ curl -X DELETE \
   'http://localhost:8088/etoro-api/positions/close?id=1621284697' \
   -H 'mode: Demo'
 ````
-### Donate
 
-* [$2](https://www.paypal.me/oleh2208/2)
-
-* [$5](https://www.paypal.me/oleh2208/5)
-
-* [$10](https://www.paypal.me/oleh2208/10)
