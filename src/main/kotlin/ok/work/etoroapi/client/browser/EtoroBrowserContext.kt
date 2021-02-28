@@ -42,12 +42,18 @@ class EtoroMetadataService(@Value("\${etoro.baseUrl}") val baseUrl: String, @Val
             }
         }
 
+        // https://stackoverflow.com/questions/41460168/what-is-difference-between-xvfb-and-chromedriver-and-when-to-use-them
+        //
         opts = ChromeOptions()
         System.setProperty("webdriver.chrome.driver", pathToDriver)
-//        opts.addArguments("start-maximized")
-        opts.addArguments("--headless")
-        opts.addArguments("--no-sandbox")
-        opts.addArguments("--disable-blink-features=AutomationControlled")
+        opts.addArguments("--no-sandbox"); // Bypass OS security model
+        opts.addArguments("--headless");
+        opts.addArguments("start-maximized"); // open Browser in maximized mode
+        opts.addArguments("disable-infobars"); // disabling infobars
+        opts.addArguments("--disable-extensions"); // disabling extensions
+        opts.addArguments("--disable-gpu"); // applicable to windows os only
+        opts.addArguments("--disable-dev-shm-usage"); // overcome limited resource problems
+        opts.setExperimentalOption("useAutomationExtension", false);
         login()
     }
 
