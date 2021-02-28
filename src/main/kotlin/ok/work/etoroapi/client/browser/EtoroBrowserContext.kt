@@ -35,7 +35,7 @@ class EtoroMetadataService(@Value("\${etoro.baseUrl}") val baseUrl: String, @Val
                 "drivers/mac/chromedriver"
             }
             System.getProperty("os.name").toLowerCase().contains("windows") -> {
-                "drivers/windows/chromedriver.exe"
+                "drivers/windows/chromedriver2.exe"
             }
             else -> {
                 "drivers/ubuntu/chromedriver"
@@ -46,14 +46,9 @@ class EtoroMetadataService(@Value("\${etoro.baseUrl}") val baseUrl: String, @Val
         //
         opts = ChromeOptions()
         System.setProperty("webdriver.chrome.driver", pathToDriver)
+        opts.addArguments("start-maximized")
         opts.addArguments("--no-sandbox"); // Bypass OS security model
-        opts.addArguments("--headless");
-        opts.addArguments("start-maximized"); // open Browser in maximized mode
-        opts.addArguments("disable-infobars"); // disabling infobars
-        opts.addArguments("--disable-extensions"); // disabling extensions
-        opts.addArguments("--disable-gpu"); // applicable to windows os only
-        opts.addArguments("--disable-dev-shm-usage"); // overcome limited resource problems
-        opts.setExperimentalOption("useAutomationExtension", false);
+        opts.addArguments("--disable-blink-features=AutomationControlled")
         login()
     }
 
