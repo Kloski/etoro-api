@@ -2,7 +2,6 @@ package ok.work.etoroapi.controller
 
 import ok.work.etoroapi.client.EtoroHttpClient
 import ok.work.etoroapi.client.EtoroMirrors
-import ok.work.etoroapi.client.EtoroPosition
 import ok.work.etoroapi.model.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
@@ -40,12 +39,5 @@ class MonitorController {
     fun getMonitoredPersonShares(@RequestHeader(defaultValue = "Demo") mode: String, @RequestParam cid: String): List<MirrorWithPositions> {
         return httpClient.getPortfolioShares(ofString(mode), cid)
     }
-
-
-    @GetMapping("/data")
-    fun getMonitoredPersonDataData(@RequestHeader(defaultValue = "Demo") mode: String, @RequestParam cidList: String): List<EtoroPosition> {
-        return httpClient.getPersonDataData(ofString(mode), cidList)
-    }
-
 }
 

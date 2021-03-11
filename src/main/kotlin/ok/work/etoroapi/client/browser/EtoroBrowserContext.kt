@@ -67,6 +67,7 @@ class EtoroMetadataService(@Value("\${etoro.baseUrl}") val baseUrl: String, @Val
         var seconds = 0
         while (true) {
             try {
+                Thread.sleep(1500)
                 token = driver.executeScript("return JSON.parse(atob(window.localStorage.loginData)).stsData_app_1.accessToken;") as String
                 logger.info("Token retrieved after %d seconds".format(seconds))
                 break
@@ -74,7 +75,6 @@ class EtoroMetadataService(@Value("\${etoro.baseUrl}") val baseUrl: String, @Val
                 if (seconds > 5) {
                     throw RuntimeException("Failed to retrieve token")
                 }
-                Thread.sleep(1000)
                 seconds++
             }
         }

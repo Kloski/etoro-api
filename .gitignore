@@ -37,4 +37,7 @@ watchlist.json
 /.env
 /src/main/resources/application-personal.yaml
 /src/main/resources/logback-personal.xml
+/src/main/resources/personal.txt
 etoro-api.*.gz
+/sandbox/
+/gradle/

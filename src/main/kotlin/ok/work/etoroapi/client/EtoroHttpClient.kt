@@ -142,8 +142,7 @@ class EtoroHttpClient {
     }
 
     fun getPersonDetail(mode: TradingMode, cid: String): UserDetail {
-        val req = prepareRequest(
-            "sapi/rankings/cid/${cid}/rankings/?Period=OneYearAgo&client_request_id=${userContext.requestId}",
+        val req = prepareRequest2("sapi/rankings/cid/${cid}/rankings/?Period=OneYearAgo&client_request_id=${userContext.requestId}",
             userContext.exchangeToken, mode, metadataService.getMetadata()
         )
             .GET()
@@ -235,31 +234,6 @@ class EtoroHttpClient {
         return positions.filter { cid.equals(it.parentCID.toString()) }
     }
 
-    /**
-     * Copy user detail data - not so useful
-     */
-    fun getPersonDataData(mode: TradingMode, cidList: String): List<EtoroPosition> {
-        val req = prepareRequest(
-            "api/logininfo/v1.1/aggregatedInfo?avatar=false&cidList=%5B${cidList}%5D&client_request_id=${userContext.requestId}&realcid=true",
-            userContext.exchangeToken, mode, metadataService.getMetadata()
-        )
-            .GET()
-            .build()
-
-        val response = JSONObject(client.send(req, HttpResponse.BodyHandlers.ofString()).body())
-            .toString()
-
-        try {
-            throw Exception("Hi There!")
-        } catch (e: Exception) {
-            logger.error("Test fail", e)
-        } finally {
-            // optional finally block
-        }
-
-        return emptyList()
-    }
-
     fun getAllLoginData(mode: TradingMode): String {
         val req = prepareRequest(
             "api/logininfo/v1.1/logindata?" +
@@ -269,7 +243,8 @@ class EtoroHttpClient {
             .GET()
             .build()
 
-        return client.send(req, HttpResponse.BodyHandlers.ofString()).body()
+        val loginData = client.send(req, HttpResponse.BodyHandlers.ofString()).body()
+        return loginData
     }
 
     fun getPositions(mode: TradingMode): List<EtoroPosition> {
@@ -316,7 +291,8 @@ class EtoroHttpClient {
         )
             .GET()
             .build()
-        return JSONObject(client.send(request, HttpResponse.BodyHandlers.ofString()).body())
+        val loginData = JSONObject(client.send(request, HttpResponse.BodyHandlers.ofString()).body())
+        return loginData
     }
 
     fun getMirrors(mode: String): List<Mirror> {
