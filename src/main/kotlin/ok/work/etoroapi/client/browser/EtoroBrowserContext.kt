@@ -1,5 +1,8 @@
 package ok.work.etoroapi.client.browser
 
+import ok.work.etoroapi.client.appVersion
+import ok.work.etoroapi.client.appid
+import ok.work.etoroapi.client.userAgent
 import ok.work.etoroapi.config.UserDataProperties
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
@@ -7,7 +10,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import java.lang.RuntimeException
 import java.util.*
 import javax.annotation.PostConstruct
 
@@ -95,7 +97,7 @@ class EtoroMetadataService(@Value("\${etoro.baseUrl}") val baseUrl: String, @Val
         return EtoroMetadata(
                 cookies,
                 token,
-                """{"UserAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36","ApplicationVersion":"213.0.2","ApplicationName":"ReToro","AccountType":"Demo","ApplicationIdentifier":"ReToro"}""",
+                """{"UserAgent":"${userAgent}","ApplicationVersion":"${appVersion}","ApplicationName":"${appid}","AccountType":"Demo","ApplicationIdentifier":"${appid}"}""",
                 baseUrl,
                 domain
         )
