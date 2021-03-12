@@ -42,6 +42,7 @@ dependencies {
     compile("ch.qos.logback.contrib:logback-json-classic:0.1.5")
     compile("ch.qos.logback.contrib:logback-jackson:0.1.5")
     compile("javax.mail:mail:1.4.7")
+    compile("javax.mail:javax.mail-api:1.5.3")
     compile("javax.activation:activation:1.1.1")
 
     // Swagger
